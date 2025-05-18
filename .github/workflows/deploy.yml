@@ -1,0 +1,53 @@
+# Name of your workflow
+name: Deploy Simple Website to GitHub Pages
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push events but only for the main branch
+  push:
+    branches: [ "main" ] # Runs only when pushing to main
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions for the GITHUB_TOKEN to allow deployment to GitHub Pages
+# These permissions are crucial for the deployment actions to work
+permissions:
+  contents: read       # Allows checking out the code
+  pages: write         # Allows deploying to GitHub Pages
+  id-token: write      # Allows authentication for deployment
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This job is named "deploy"
+  deploy:
+    # Specifies the type of runner the job will run on
+    runs-on: ubuntu-latest # Use the latest available Ubuntu runner
+
+    # Grant GITHUB_TOKEN the permissions required to deploy Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }} # Sets the deployment URL output
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Step 1: Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout code
+        uses: actions/checkout@v4 # Use the official checkout action (v4 is recent as of writing)
+
+      # Step 2: Sets up GitHub Pages features
+      - name: Setup Pages
+        uses: actions/configure-pages@v5 # Use the official configure-pages action
+
+      # Step 3: Builds the site contents into an artifact ready for deployment
+      # For simple HTML/CSS, this just means collecting the files from the root directory
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3 # Use the official upload-pages-artifact action
+        with:
+          # Upload the entire repository root (where index.html is)
+          path: '.'
+
+      # Step 4: Deploys the artifact to GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deployment # Give this step an ID so we can reference its output
+        uses: actions/deploy-pages@v4 # Use the official deploy-pages action
